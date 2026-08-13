@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: acme-salary-api
+  datasource:
+    url: jdbc:sqlite:${ACME_DB_PATH:./data/acme-salary.db}
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+acme:
+  jwt:
+    secret: "acme-salary-demo-secret-change-me-please-32b"
+    ttl-hours: 8
+  seed:
+    enabled: true
+    employees: 10000
+    demo-password: Password123!
