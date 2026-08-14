@@ -4,9 +4,9 @@
 
 Chose Spring Boot. The job description lists both; Spring Security, Data JPA, and MockMvc are the fastest path to production-shaped RBAC and tests. Micronaut would shave startup time that this app does not need.
 
-## SQLite vs Postgres
+## MySQL vs SQLite
 
-SQLite is in the brief and is honest for a single-node HR tool at 10k rows. We lose concurrent write scale and some SQL features. Indexes and pagination still matter so the design survives a later Postgres move (Flyway + standard SQL).
+MySQL is the runtime database so local Compose and hosted deploys share one JDBC URL contract. SQLite was simpler for a single file, but it fights Hibernate validation and does not ship cleanly to Vercel-style splits. Queries stay on JPQL so tests can keep using H2.
 
 ## JWT in localStorage vs HTTP-only cookie
 
@@ -28,6 +28,6 @@ Export is the escape hatch from the old workflow. Bulk import is a data-migratio
 
 HR expects a dense, spreadsheet-like grid. Community DataGrid gives server pagination, sorting, and a familiar look without paying for the Pro license.
 
-## Tests: H2 vs SQLite
+## Tests: H2 vs MySQL
 
-Unit/API tests use H2 in-memory with Flyway off and Hibernate `create-drop` so they stay fast and isolated. Production uses SQLite + Flyway. Queries stay on JPQL / ANSI `CASE` so both engines agree.
+Unit/API tests use H2 in-memory with Flyway off and Hibernate `create-drop` so they stay fast and isolated. The running app uses MySQL + Flyway. Queries stay on JPQL / ANSI `CASE` so both engines agree.

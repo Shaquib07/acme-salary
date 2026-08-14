@@ -1,6 +1,6 @@
 # Architecture
 
-ACME Salary is a modular monolith: a Spring Boot API and a React SPA. One process, one SQLite file, ~10k employees. That is enough scale for this product and keeps operations trivial for the assessment.
+ACME Salary is a modular monolith: a Spring Boot API and a React SPA. One process, one MySQL database, ~10k employees. That is enough scale for this product and keeps local Docker and later hosting on the same env-var contract.
 
 ```
 Browser (React + MUI)
@@ -14,7 +14,7 @@ Spring Boot 3 (Java 21)
   JPA       -> Hibernate
         |
         v
-SQLite (Flyway migrations)
+MySQL (Flyway migrations)
 ```
 
 ## Why this shape
@@ -23,7 +23,7 @@ SQLite (Flyway migrations)
 - **Server-side pagination.** The directory never ships 10k rows to the browser. Filters and sort run in SQL with indexes on email, last name, country+status, department+status.
 - **Insights in SQL.** `GROUP BY` country, department, and currency. Mixed currencies are never summed. USD totals use a seeded FX table and are labeled approximate.
 - **JWT + method security.** The SPA stores a token and sends `Authorization: Bearer`. `@PreAuthorize` on controllers is the real gate; the UI only hides buttons.
-- **SQLite in a volume.** Fine for 10k rows and a single instance. Postgres would be the next step for concurrent writers or Azure.
+- **MySQL via env vars.** Local Compose and production use the same `SPRING_DATASOURCE_*` settings. No SQLite file on disk.
 
 ## Modules (backend)
 
@@ -42,4 +42,4 @@ Vite + React + TypeScript. TanStack Query for server state. MUI DataGrid in **se
 
 ## Deployment
 
-Docker Compose: `api` (JDK 21) + `web` (nginx static build). SQLite file on a named volume. Health: Spring Actuator `/actuator/health`.
+Docker Compose: `mysql` + `api` (JDK 21) + `web` (nginx static build). Health: Spring Actuator `/actuator/health`.
