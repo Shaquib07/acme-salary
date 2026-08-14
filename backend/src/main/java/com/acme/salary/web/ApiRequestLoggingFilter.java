@@ -9,15 +9,13 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class ApiRequestLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(ApiRequestLoggingFilter.class);
@@ -38,7 +36,10 @@ public class ApiRequestLoggingFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
         } finally {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String user = auth != null && auth.isAuthenticated() ? auth.getName() : "anonymous";
+            String user = "anonymous";
+            if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+                user = auth.getName();
+            }
             log.info(
                     "{} {} -> {} ({} ms) user={}",
                     request.getMethod(),
