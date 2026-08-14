@@ -23,15 +23,12 @@ import { employeeQueryString, formatMoney } from "../lib/format";
 export function DirectoryPage() {
   const { allowed } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [q, setQ] = useState("");
   const [country, setCountry] = useState("");
   const [department, setDepartment] = useState("");
   const [status, setStatus] = useState("ACTIVE");
   const [pagination, setPagination] = useState<GridPaginationModel>({ page: 0, pageSize: 20 });
   const [sort, setSort] = useState("lastName,asc");
-  const [selected, setSelected] = useState<Employee | null>(null);
-  const [salary, setSalary] = useState("");
   const [toast, setToast] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -47,15 +44,6 @@ export function DirectoryPage() {
 
   const filters = useQuery({ queryKey: ["filters"], queryFn: api.filters });
   const list = useQuery({ queryKey: ["employees", query], queryFn: () => api.employees(query) });
-
-  const saveSalary = useMutation({
-    mutationFn: () => api.patchSalary(selected!.id, Number(salary)),
-    onSuccess: () => {
-      setToast("Salary updated");
-      setSelected(null);
-      queryClient.invalidateQueries({ queryKey: ["employees"] });
-    },
-  });
 
   const columns: GridColDef<Employee>[] = useMemo(
     () => [
@@ -152,48 +140,10 @@ export function DirectoryPage() {
             const first = model[0];
             setSort(first ? `${first.field},${first.sort}` : "lastName,asc");
           }}
-          onRowClick={(params) => {
-            if (allowed("editSalary")) {
-              setSelected(params.row);
-              setSalary(String(params.row.annualSalary));
-            } else {
-              navigate(`/employees/${params.row.id}`);
-            }
-          }}
+          onRowClick={(params) => navigate(`/employees/${params.row.id}`)}
           disableRowSelectionOnClick
         />
       </Box>
-      <Drawer anchor="right" open={Boolean(selected)} onClose={() => setSelected(null)}>
-        <Box sx={{ width: 360, p: 3 }}>
-          {selected && (
-            <Stack gap={2}>
-              <Typography variant="h6">
-                {selected.firstName} {selected.lastName}
-              </Typography>
-              <Typography color="text.secondary">{selected.email}</Typography>
-              <Typography>
-                {selected.countryCode} · {selected.currencyCode}
-              </Typography>
-              <TextField
-                label="Annual salary"
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
-                type="number"
-                error={Number(salary) <= 0}
-                helperText={Number(salary) <= 0 ? "Salary must be greater than 0" : " "}
-              />
-              <Button
-                variant="contained"
-                disabled={Number(salary) <= 0 || saveSalary.isPending}
-                onClick={() => saveSalary.mutate()}
-              >
-                Save salary
-              </Button>
-              <Button onClick={() => navigate(`/employees/${selected.id}`)}>Open profile</Button>
-            </Stack>
-          )}
-        </Box>
-      </Drawer>
       <CreateDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={() => setToast("Employee created")} />
       <Snackbar open={Boolean(toast)} autoHideDuration={3000} onClose={() => setToast(null)} message={toast} />
     </Stack>
