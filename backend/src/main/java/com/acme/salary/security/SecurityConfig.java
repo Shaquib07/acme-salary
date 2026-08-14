@@ -1,7 +1,9 @@
 package com.acme.salary.security;
 
 import com.acme.salary.auth.AppUserDetailsService;
+import com.acme.salary.web.ApiRequestLoggingFilter;
 import java.util.List;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,14 +26,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final ApiRequestLoggingFilter requestLoggingFilter;
     private final JsonAuthEntryPoint authEntryPoint;
     private final JsonAccessDeniedHandler accessDeniedHandler;
 
     public SecurityConfig(
             JwtAuthFilter jwtAuthFilter,
+            ApiRequestLoggingFilter requestLoggingFilter,
             JsonAuthEntryPoint authEntryPoint,
             JsonAccessDeniedHandler accessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.requestLoggingFilter = requestLoggingFilter;
         this.authEntryPoint = authEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
     }
@@ -47,8 +52,17 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(requestLoggingFilter, JwtAuthFilter.class);
         return http.build();
+    }
+
+    @Bean
+    FilterRegistrationBean<ApiRequestLoggingFilter> disableRequestLoggingRegistration(
+            ApiRequestLoggingFilter filter) {
+        FilterRegistrationBean<ApiRequestLoggingFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean
