@@ -52,7 +52,11 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body.message || "Request failed");
+    const fieldErrors =
+      body.fields && typeof body.fields === "object"
+        ? Object.values(body.fields).filter(Boolean).join(", ")
+        : "";
+    throw new Error(body.message || fieldErrors || "Request failed");
   }
   if (response.headers.get("content-type")?.includes("text/csv")) {
     return (await response.text()) as T;
