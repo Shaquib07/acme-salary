@@ -77,7 +77,7 @@ export function DirectoryPage() {
   return (
     <Stack gap={2}>
       <Stack direction="row" justifyContent="space-between" alignItems="center">
-        <Typography variant="h5">Employee directory</Typography>
+        <Typography variant="h5">Employee Details</Typography>
         <Stack direction="row" gap={1}>
           {allowed("exportCsv") && (
             <Button variant="outlined" onClick={onExport}>
