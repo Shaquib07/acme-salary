@@ -20,7 +20,7 @@ export function AppShell() {
             ACME Salary
           </Typography>
           <Button color="inherit" component={RouterLink} to="/directory">
-            Directory
+            Employee Details
           </Button>
           <Button color="inherit" component={RouterLink} to="/insights">
             Pay insights
