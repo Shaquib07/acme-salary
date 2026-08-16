@@ -1,6 +1,7 @@
 import type { Role } from "./auth/roles";
 
 const TOKEN_KEY = "acme.jwt";
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/$/, "");
 
 export type Employee = {
   id: number;
@@ -40,7 +41,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  const response = await fetch(path, { ...init, headers });
+  const response = await fetch(`${API_BASE}${path}`, { ...init, headers });
   if (response.status === 401) {
     localStorage.removeItem(TOKEN_KEY);
     throw new Error("unauthorized");
