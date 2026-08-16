@@ -44,7 +44,14 @@ GRANT ALL PRIVILEGES ON acme_salary.* TO 'acme'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-Override with `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`. Same variables are what you set on Railway/Render.
+Override with `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`. Same variables are what you set on Railway.
+
+## Vercel + Railway
+
+1. Railway: MySQL plugin, then API from `backend/` (Dockerfile). Set vars from `.env.example`. First boot `ACME_SEED_ENABLED=true`, then `false`.
+2. Vercel: import repo, **Root Directory** `frontend`. Set `VITE_API_BASE` to the Railway HTTPS URL (no trailing slash) and redeploy so the build picks it up.
+
+Local UI still uses the Vite `/api` proxy when `VITE_API_BASE` is empty.
 
 ```bash
 cd frontend
