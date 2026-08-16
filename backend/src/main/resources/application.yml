@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 spring:
   application:
@@ -47,3 +47,6 @@ acme:
     enabled: ${ACME_SEED_ENABLED:true}
     employees: 10000
     demo-password: Password123!
+  cors:
+    origins: "${ACME_CORS_ORIGINS:http://localhost:5173,http://localhost:8081,http://localhost:80,http://localhost}"
+    origin-patterns: "${ACME_CORS_ORIGIN_PATTERNS:https://*.vercel.app}"
