@@ -18,3 +18,6 @@ acme:
   jwt:
     secret: "test-secret-test-secret-test-secret-32"
     ttl-hours: 1
+  cors:
+    origins: http://localhost:5173
+    origin-patterns: https://*.vercel.app
