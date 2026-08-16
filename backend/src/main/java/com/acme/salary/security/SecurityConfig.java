@@ -1,6 +1,7 @@
 package com.acme.salary.security;
 
 import com.acme.salary.auth.AppUserDetailsService;
+import com.acme.salary.config.AcmeProperties;
 import com.acme.salary.web.ApiRequestLoggingFilter;
 import java.util.List;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -29,16 +30,19 @@ public class SecurityConfig {
     private final ApiRequestLoggingFilter requestLoggingFilter;
     private final JsonAuthEntryPoint authEntryPoint;
     private final JsonAccessDeniedHandler accessDeniedHandler;
+    private final AcmeProperties properties;
 
     public SecurityConfig(
             JwtAuthFilter jwtAuthFilter,
             ApiRequestLoggingFilter requestLoggingFilter,
             JsonAuthEntryPoint authEntryPoint,
-            JsonAccessDeniedHandler accessDeniedHandler) {
+            JsonAccessDeniedHandler accessDeniedHandler,
+            AcmeProperties properties) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.requestLoggingFilter = requestLoggingFilter;
         this.authEntryPoint = authEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.properties = properties;
     }
 
     @Bean
@@ -85,11 +89,13 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:8081",
-                "http://localhost:80",
-                "http://localhost"));
+        AcmeProperties.Cors cors = properties.cors();
+        if (!cors.origins().isEmpty()) {
+            config.setAllowedOrigins(cors.origins());
+        }
+        if (!cors.originPatterns().isEmpty()) {
+            config.setAllowedOriginPatterns(cors.originPatterns());
+        }
         config.setAllowedMethods(List.of("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
